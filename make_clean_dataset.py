@@ -40,7 +40,7 @@ with open('incd.csv', newline='') as f:
     for row in reader:
         key = row[1].strip()
         incidence = row[3].strip()
-        data.set_value(key,'Cancer_Incidence', incidence)
+        data.at[key,'Cancer_Incidence'] = incidence
 
 # read the demographic data
 with open('chsi_dataset/DEMOGRAPHICS.csv', newline='') as f:
@@ -49,7 +49,7 @@ with open('chsi_dataset/DEMOGRAPHICS.csv', newline='') as f:
         key = row['State_FIPS_Code'] + row['County_FIPS_Code']
         for col in cols:
             if col in row:
-                data.set_value(key, col, row[col])
+                data.at[key, col] = row[col]
 
 def padZero(text,length):
     l = len(text)
@@ -67,7 +67,7 @@ with open('chsi_dataset/RISKFACTORSANDACCESSTOCARE.csv', newline='') as f:
         key = fipsState + fipsCounty
         for col in cols:
             if col in row:
-                data.set_value(key, col, row[col])
+                data.at[key, col] = row[col]
 
 # read in exposure
 with open('chsi_dataset/VUNERABLEPOPSANDENVHEALTH.csv', newline='') as f:
@@ -78,6 +78,6 @@ with open('chsi_dataset/VUNERABLEPOPSANDENVHEALTH.csv', newline='') as f:
         key = fipsState + fipsCounty
         for col in cols:
             if col in row:
-                data.set_value(key, col, row[col])
+                data.at[key, col] = row[col]
 
-data.to_csv('clean_data.csv')        
+data.to_csv('clean_data.csv', index_label='FIPS')
