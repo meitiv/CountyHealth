@@ -51,28 +51,33 @@ for (i in c('Sulfur_Dioxide_Ind',
 ## drop useless columns
 data <- healthData[,!(names(healthData) %in% c('FIPS', 'Sulfur_Dioxide_Ind'))]
 
-## bnlearn
-library(bnlearn)
-## bn = hc(na.omit(data))
 cleanData = na.omit(data)
+
+## bnlearn
+## library(bnlearn)
 ## naive Bayes
 ## nb <- naive.bayes(cleanData, 'Cancer_Incidence')
 ## pred <- predict(nb, cleanData)
 ## tab <- table(pred,cleanData[,'Cancer_Incidence'])
 
 ## tree augmented naive Bayes
-tan <- tree.bayes(cleanData, 'Cancer_Incidence')
-fitted <- bn.fit(tan, cleanData, method = "bayes")
-pred = predict(fitted, cleanData)
-tab <- table(pred, cleanData[, 'Cancer_Incidence'])
+## tan <- tree.bayes(cleanData, 'Cancer_Incidence')
+## fitted <- bn.fit(tan, cleanData, method = "bayes")
+## pred = predict(fitted, cleanData)
+## tab <- table(pred, cleanData[, 'Cancer_Incidence'])
 
-sum <- 0
-num <- 0
-for (i in 1:5) {
-    for (j in 1:5) {
-        sum <- sum + abs(i-j)*tab[i,j]
-        num <- num + tab[i,j]
-    }
-}
-err <- sum/num/nbins
+## sum <- 0
+## num <- 0
+## for (i in 1:5) {
+##     for (j in 1:5) {
+##         sum <- sum + abs(i-j)*tab[i,j]
+##         num <- num + tab[i,j]
+##     }
+## }
+## err <- sum/num/nbins
 
+## bnclassify
+library(bnclassify)
+tn <- tan_cl('Cancer_Incidence', cleanData, score = 'aic')
+tn <- lp(tn, cleanData, smooth = 0.01)
+p <- predict(tn, cleanData, prob = TRUE)
