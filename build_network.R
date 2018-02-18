@@ -12,7 +12,7 @@ for (i in c('Uninsured', 'Unemployed', 'Major_Depression',
     
 ## factorize the columns that are not indicators and bin using ntiles
 ## with nbins levels for continuously varying columns
-nbins <- 7
+nbins <- 8
 for (i in c('Cancer_Incidence',
             'Population_Size',
             'Population_Density',
@@ -54,30 +54,37 @@ data <- healthData[,!(names(healthData) %in% c('FIPS', 'Sulfur_Dioxide_Ind'))]
 cleanData = na.omit(data)
 
 ## bnlearn
-## library(bnlearn)
+library(bnlearn)
 ## naive Bayes
 ## nb <- naive.bayes(cleanData, 'Cancer_Incidence')
 ## pred <- predict(nb, cleanData)
 ## tab <- table(pred,cleanData[,'Cancer_Incidence'])
 
 ## tree augmented naive Bayes
-## tan <- tree.bayes(cleanData, 'Cancer_Incidence')
-## fitted <- bn.fit(tan, cleanData, method = "bayes")
-## pred = predict(fitted, cleanData)
-## tab <- table(pred, cleanData[, 'Cancer_Incidence'])
 
-## sum <- 0
-## num <- 0
-## for (i in 1:5) {
-##     for (j in 1:5) {
-##         sum <- sum + abs(i-j)*tab[i,j]
-##         num <- num + tab[i,j]
-##     }
-## }
-## err <- sum/num/nbins
+## training and testing sets
+library(caret)
+trainIndex <- createDataPartition(cleanData$Cancer_Incidence, p = .75,
+                                  list = FALSE, times = 1)
+trainData <- cleanData[trainIndex,]
+testData <- cleanData[-trainIndex,]
+tan <- tree.bayes(trainData, 'Cancer_Incidence')
+fitted <- bn.fit(tan, trainData, method = "bayes")
+pred = predict(fitted, testData)
+tab <- table(pred, testData[, 'Cancer_Incidence'])
 
+sum <- 0
+num <- 0
+for (i in 1:5) {
+    for (j in 1:5) {
+        sum <- sum + abs(i-j)*tab[i,j]
+        num <- num + tab[i,j]
+    }
+}
+err <- sum/num/nbins
+print(err)
 ## bnclassify
-library(bnclassify)
-tn <- tan_cl('Cancer_Incidence', cleanData, score = 'aic')
-tn <- lp(tn, cleanData, smooth = 0.01)
-p <- predict(tn, cleanData, prob = TRUE)
+## library(bnclassify)
+## tn <- tan_cl('Cancer_Incidence', cleanData, score = 'aic')
+## tn <- lp(tn, cleanData, smooth = 0.01)
+## p <- predict(tn, cleanData, prob = TRUE)
